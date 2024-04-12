@@ -18,6 +18,8 @@
             background-color: #fff;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: auto; /* Add overflow property to enable scrolling */
+            height: 600px; /* Set the height of the container */
         }
         h1 {
             color: black;
@@ -52,6 +54,8 @@
         th {
             background-color: lightblue;
             color: white;
+            position: sticky; /* Make the headers sticky */
+            top: 0; /* Stick to the top */
         }
         .statusDone {
             color: black;
@@ -63,39 +67,41 @@
 </head>
 <body>
     <h1>Reports Distribution System</h1>
-    <div class="input-container">
-        <label for="datePicker">Select Date:</label>
-        <!-- Replace input type="date" with this -->
-        <input type="text" id="datePicker">
-    </div>
-    <div class="input-container">
-        <label for="statusFilter">Search by Status:</label>
-        <select id="statusFilter">
-            <option value="">All</option>
-            <option value="Done">Done</option>
-            <option value="Fail">Fail</option>
-        </select>
-    </div>
-    <div class="input-container">
-        <button id="refreshButton">Refresh</button>
-    </div>
-    <br><br>
-    <table id="reportTable">
-        <thead>
-            <tr>
-                <th>Task</th>
-                <th>As of Date</th>
-                <th>Batch</th>
-                <th>Status</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Data will be dynamically added here -->
-        </tbody>
-    </table>
+    <div class="container"> <!-- Add a container with fixed height for scrolling -->
+        <div class="input-container">
+            <label for="datePicker">Select Date:</label>
+            <!-- Replace input type="date" with this -->
+            <input type="text" id="datePicker">
+        </div>
+        <div class="input-container">
+            <label for="statusFilter">Search by Status:</label>
+            <select id="statusFilter">
+                <option value="">All</option>
+                <option value="Done">Done</option>
+                <option value="Fail">Fail</option>
+            </select>
+        </div>
+        <div class="input-container">
+            <button id="refreshButton">Refresh</button>
+        </div>
+        <br><br>
+        <table id="reportTable">
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>As of Date</th>
+                    <th>Batch</th>
+                    <th>Status</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be dynamically added here -->
+            </tbody>
+        </table>
+    </div> <!-- Close the container -->
 
     <!-- Include Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -110,9 +116,9 @@
         function generateRandomStatus() {
             const randomNumber = Math.random();
             if (randomNumber < 0.6) {
-                return 'Done'; // 60% chance for "done"
+                return 'Done'; // 60% chance for "Done"
             } else {
-                return 'Fail'; // 40% chance for "fail"
+                return 'Fail'; // 40% chance for "Fail"
             }
         }
 
@@ -150,42 +156,41 @@
         }
 
         function updateEndTimes() {
-    const rows = document.querySelectorAll('#reportTable tbody tr');
-    const statusFilter = document.getElementById('statusFilter').value;
+            const rows = document.querySelectorAll('#reportTable tbody tr');
+            const statusFilter = document.getElementById('statusFilter').value;
 
-    rows.forEach(row => {
-        const statusCell = row.cells[3];
-        const statusSet = row.getAttribute('data-status-set'); // Get status set attribute
-        if (statusSet === 'false') {
-            statusCell.textContent = 'Start'; // Set status to "Start" initially
-        }
-
-        setInterval(() => {
-            const endTimeCell = row.querySelector('.endTime');
-            const statusCell = row.cells[3];
-            const statusSet = row.getAttribute('data-status-set'); // Get status set attribute
-            const status = generateRandomStatus();
-            const endTimeString = new Date().toLocaleTimeString();
-            if (!statusFilter || status === statusFilter) {
-                // Check if status is not already set
+            rows.forEach(row => {
+                const statusCell = row.cells[3];
+                const statusSet = row.getAttribute('data-status-set'); // Get status set attribute
                 if (statusSet === 'false') {
-                    statusCell.textContent = status;
-                    statusCell.classList.remove('statusDone', 'statusFail');
-                    if (status === 'Done') {
-                        statusCell.classList.add('statusDone');
-                    } else if (status === 'Fail') {
-                        statusCell.classList.add('statusFail');
-                    }
-                    row.setAttribute('data-status-set', 'true'); // Set status set attribute to true
+                    statusCell.textContent = 'Start'; // Set status to "Start" initially
                 }
-            }
-            if (endTimeCell.textContent === '') {
-                endTimeCell.textContent = endTimeString;
-            }
-        }, 2 * 60000); // 1 minute in milliseconds
-    });
-}
 
+                setInterval(() => {
+                    const endTimeCell = row.querySelector('.endTime');
+                    const statusCell = row.cells[3];
+                    const statusSet = row.getAttribute('data-status-set'); // Get status set attribute
+                    const status = generateRandomStatus();
+                    const endTimeString = new Date().toLocaleTimeString();
+                    if (!statusFilter || status === statusFilter) {
+                        // Check if status is not already set
+                        if (statusSet === 'false') {
+                            statusCell.textContent = status;
+                            statusCell.classList.remove('statusDone', 'statusFail');
+                            if (status === 'Done') {
+                                statusCell.classList.add('statusDone');
+                            } else if (status === 'Fail') {
+                                statusCell.classList.add('statusFail');
+                            }
+                            row.setAttribute('data-status-set', 'true'); // Set status set attribute to true
+                        }
+                    }
+                    if (endTimeCell.textContent === '') {
+                        endTimeCell.textContent = endTimeString;
+                    }
+                }, 2 * 60000); // 1 minute in milliseconds
+            });
+        }
 
         function handleRefresh() {
             currentBatch++;
